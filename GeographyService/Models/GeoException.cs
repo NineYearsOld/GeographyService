@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace GeographyService.Models
 {
-    public class GeographyException: Exception
+    public class GeoException: Exception
     {
-        public GeographyException(string message) : base(message)
+        public GeoException(string message) : base(message)
         { 
         }
     }

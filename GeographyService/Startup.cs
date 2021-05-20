@@ -11,6 +11,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GeographyService.Models;
+using GeographyService.Models.Interfaces;
+using GeographyService.Models.Repositories;
 
 namespace GeographyService
 {
@@ -26,8 +29,11 @@ namespace GeographyService
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
             services.AddControllers();
+            services.AddSingleton<IContinentRepository, ContinentRepository>();
+            services.AddSingleton<IRiverRepository, RiverRepository>();
+            services.AddSingleton<ICountryRepository, CountryRepository>();
+            services.AddSingleton<ICityRepository, CityRepository>();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "GeographyService", Version = "v1" });
