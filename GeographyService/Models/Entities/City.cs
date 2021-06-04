@@ -1,32 +1,28 @@
-﻿using System;
+﻿using GeographyService.Models.Entities.Mappings;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GeographyService.Models
+namespace GeographyService.Models.Entities
 {
-    public class Continent
+    public class City
     {
-        public Continent()
+        public City()
         {
 
         }
-        public Continent(string name, int population)
+        public City(string name, int population)
         {
-            Name = name;
-            Population = population;
-        }
-        public Continent(int id, string name, int population)
-        {
-            Id = id;
             Name = name;
             Population = population;
         }
         [DatabaseGeneratedAttribute(DatabaseGeneratedOption.Identity), Key()]
-        public int Id { get; set; }
+        public int CityId { get; set; }
         public string Name { get; set; }
         public int Population { get; set; }
+        public ICollection<CityMapping>? CityMappings { get; set; }
     }
 }

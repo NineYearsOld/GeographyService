@@ -1,32 +1,28 @@
-﻿using System;
+﻿using GeographyService.Models.Entities.Mappings;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GeographyService.Models
+namespace GeographyService.Models.Entities
 {
-    public class City
+    public partial class Continent
     {
-        public City()
+        public Continent()
         {
 
         }
-        public City(string name, int population)
+        public Continent(string name)
         {
             Name = name;
-            Population = population;
-        }
-        public City(int id, string name, int population)
-        {
-            Id = id;
-            Name = name;
-            Population = population;
         }
         [DatabaseGeneratedAttribute(DatabaseGeneratedOption.Identity), Key()]
-        public int Id { get; set; }
+        public int ContinentId { get; set; }
         public string Name { get; set; }
         public int Population { get; set; }
+        public ICollection<CountryMapping>? CountryMappings { get; set; }
     }
 }

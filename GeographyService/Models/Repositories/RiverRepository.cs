@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GeographyService.Data;
+using GeographyService.Models.Entities;
+using GeographyService.Models.Entities.Mappings;
 using GeographyService.Models.Interfaces;
 
 namespace GeographyService.Models.Repositories
@@ -15,54 +17,92 @@ namespace GeographyService.Models.Repositories
         }
         public IEnumerable<River> GetAll()
         {
-            using (GeoContext ctx = new GeoContext())
-            {
-                return ctx.Rivers;
-            }
+            GeoContext ctx = new GeoContext();
+
+            return ctx.Rivers;
         }
         public River GetRiver(int id)
         {
-            using (GeoContext ctx = new GeoContext())
+            GeoContext ctx = new GeoContext();
+
+            if (ExistsRiver(id))
             {
-                if (ctx.Rivers.Any(i => i.Id == id))
+                List<RiverMapping> rms = new List<RiverMapping>();
+                var r = ctx.Rivers
+                    .Where(r => r.RiverId == id)
+                    .Join(ctx.RiverMappings,
+                    r => new { RiverId = r.RiverId },
+                    rm => new { rm.RiverId },
+                    (r, rm) => new
+                    {
+                        Name = r.Name,
+                        RiverId = r.RiverId,
+                        Length = r.Length,
+                        CountryId = rm.CountryId
+                    });
+
+                foreach (var rm in r)
                 {
-                    return (River)ctx.Rivers.Where(i => i.Id == id);
+                    RiverMapping rmData = new RiverMapping { RiverId = id, CountryId = rm.CountryId };
+                    rms.Add(rmData);
                 }
-                else throw new GeoException("River does not exist in db.");
+
+                if (rms.Count == 0)
+                {
+                    return ctx.Rivers.Where(r => r.RiverId == id).First();
+                }
+
+                River river = new River { RiverId = id, Name = r.First().Name, Length = r.First().Length, RiverMappings = rms };
+
+                return river;
             }
+            else throw new GeoException("River does not exist in db.");
         }
-        public void AddRiver(River river)
+        public void AddRiver(River river, int id)
         {
-            using (GeoContext ctx = new GeoContext())
+            GeoContext ctx = new GeoContext();
+
+            if (!ctx.Rivers.Any(r => r.Name == river.Name))
             {
-                if (!ctx.Rivers.Any(n => n.Name == river.Name))
-                {
-                    ctx.Rivers.Add(river);
-                }
-                else throw new GeoException("River already added to db.");
+                river.RiverMappings = new List<RiverMapping>
+                { new RiverMapping { River = river, Country =  ctx.Countries.Single(c => c.CountryId == id)} };
+
+                ctx.Rivers.Add(river);
+                ctx.SaveChanges();
             }
+            else throw new GeoException("River already added to db.");
         }
-        public void RemoveRiver(River river)
+        public void RemoveRiver(int id)
         {
-            using (GeoContext ctx = new GeoContext())
+            GeoContext ctx = new GeoContext();
+
+            if (ExistsRiver(id))
             {
-                if (ctx.Rivers.Any(n => n.Name == river.Name))
-                {
-                    ctx.Rivers.Remove(river);
-                }
-                else throw new GeoException("River does not exist in db.");
+                ctx.Rivers.Remove(ctx.Rivers.Single(r => r.RiverId == id));
+                ctx.SaveChanges();
             }
+            else throw new GeoException("River does not exist in db.");
         }
         public void UpdateRiver(River river)
         {
-            using (GeoContext ctx = new GeoContext())
+            GeoContext ctx = new GeoContext();
+
+            if (ExistsRiver(river.RiverId))
             {
-                if (ctx.Rivers.Any(n => n.Name == river.Name))
-                {
-                    ctx.Rivers.Update(river);
-                }
-                else throw new GeoException("River does not exist in db.");
+                ctx.Rivers.Update(river);
+                ctx.SaveChanges();
             }
+            else throw new GeoException("River does not exist in db.");
+        }
+        public bool ExistsRiver(int id)
+        {
+            GeoContext ctx = new GeoContext();
+
+            if (ctx.Rivers.Any(r => r.RiverId == id))
+            {
+                return true;
+            }
+            else return false;
         }
     }
 }

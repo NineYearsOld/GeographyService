@@ -3,14 +3,16 @@ using GeographyService.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace GeographyService.Migrations
 {
     [DbContext(typeof(GeoContext))]
-    partial class GeoContextModelSnapshot : ModelSnapshot
+    [Migration("20210525230104_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -18,7 +20,7 @@ namespace GeographyService.Migrations
                 .HasAnnotation("ProductVersion", "5.0.6")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("GeographyService.Models.Entities.City", b =>
+            modelBuilder.Entity("GeographyService.Models.City", b =>
                 {
                     b.Property<int>("CityId")
                         .ValueGeneratedOnAdd()
@@ -37,7 +39,25 @@ namespace GeographyService.Migrations
                     b.ToTable("Cities");
                 });
 
-            modelBuilder.Entity("GeographyService.Models.Entities.Continent", b =>
+            modelBuilder.Entity("GeographyService.Models.CityMapping", b =>
+                {
+                    b.Property<int>("CityId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CountryId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsCapital")
+                        .HasColumnType("bit");
+
+                    b.HasKey("CityId", "CountryId");
+
+                    b.HasIndex("CountryId");
+
+                    b.ToTable("CityMappings");
+                });
+
+            modelBuilder.Entity("GeographyService.Models.Continent", b =>
                 {
                     b.Property<int>("ContinentId")
                         .ValueGeneratedOnAdd()
@@ -56,7 +76,7 @@ namespace GeographyService.Migrations
                     b.ToTable("Continents");
                 });
 
-            modelBuilder.Entity("GeographyService.Models.Entities.Country", b =>
+            modelBuilder.Entity("GeographyService.Models.Country", b =>
                 {
                     b.Property<int>("CountryId")
                         .ValueGeneratedOnAdd()
@@ -78,25 +98,7 @@ namespace GeographyService.Migrations
                     b.ToTable("Countries");
                 });
 
-            modelBuilder.Entity("GeographyService.Models.Entities.Mappings.CityMapping", b =>
-                {
-                    b.Property<int>("CityId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CountryId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsCapital")
-                        .HasColumnType("bit");
-
-                    b.HasKey("CityId", "CountryId");
-
-                    b.HasIndex("CountryId");
-
-                    b.ToTable("CityMappings");
-                });
-
-            modelBuilder.Entity("GeographyService.Models.Entities.Mappings.CountryMapping", b =>
+            modelBuilder.Entity("GeographyService.Models.CountryMapping", b =>
                 {
                     b.Property<int>("CountryId")
                         .HasColumnType("int");
@@ -111,7 +113,26 @@ namespace GeographyService.Migrations
                     b.ToTable("CountryMappings");
                 });
 
-            modelBuilder.Entity("GeographyService.Models.Entities.Mappings.RiverMapping", b =>
+            modelBuilder.Entity("GeographyService.Models.River", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("Length")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Rivers");
+                });
+
+            modelBuilder.Entity("GeographyService.Models.RiverMapping", b =>
                 {
                     b.Property<int>("CountryId")
                         .HasColumnType("int");
@@ -126,93 +147,62 @@ namespace GeographyService.Migrations
                     b.ToTable("RiverMappings");
                 });
 
-            modelBuilder.Entity("GeographyService.Models.Entities.River", b =>
+            modelBuilder.Entity("GeographyService.Models.CityMapping", b =>
                 {
-                    b.Property<int>("RiverId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("Length")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("RiverId");
-
-                    b.ToTable("Rivers");
-                });
-
-            modelBuilder.Entity("GeographyService.Models.Entities.Mappings.CityMapping", b =>
-                {
-                    b.HasOne("GeographyService.Models.Entities.City", "City")
+                    b.HasOne("GeographyService.Models.City", null)
                         .WithMany("CityMappings")
                         .HasForeignKey("CityId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("GeographyService.Models.Entities.Country", "Country")
+                    b.HasOne("GeographyService.Models.Country", null)
                         .WithMany("CityMappings")
                         .HasForeignKey("CountryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("City");
-
-                    b.Navigation("Country");
                 });
 
-            modelBuilder.Entity("GeographyService.Models.Entities.Mappings.CountryMapping", b =>
+            modelBuilder.Entity("GeographyService.Models.CountryMapping", b =>
                 {
-                    b.HasOne("GeographyService.Models.Entities.Continent", "Continent")
+                    b.HasOne("GeographyService.Models.Continent", null)
                         .WithMany("CountryMappings")
                         .HasForeignKey("ContinentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("GeographyService.Models.Entities.Country", "Country")
+                    b.HasOne("GeographyService.Models.Country", null)
                         .WithMany("CountryMappings")
                         .HasForeignKey("CountryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Continent");
-
-                    b.Navigation("Country");
                 });
 
-            modelBuilder.Entity("GeographyService.Models.Entities.Mappings.RiverMapping", b =>
+            modelBuilder.Entity("GeographyService.Models.RiverMapping", b =>
                 {
-                    b.HasOne("GeographyService.Models.Entities.Country", "Country")
+                    b.HasOne("GeographyService.Models.Country", null)
                         .WithMany("RiverMappings")
                         .HasForeignKey("CountryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("GeographyService.Models.Entities.River", "River")
+                    b.HasOne("GeographyService.Models.River", null)
                         .WithMany("RiverMappings")
                         .HasForeignKey("RiverId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Country");
-
-                    b.Navigation("River");
                 });
 
-            modelBuilder.Entity("GeographyService.Models.Entities.City", b =>
+            modelBuilder.Entity("GeographyService.Models.City", b =>
                 {
                     b.Navigation("CityMappings");
                 });
 
-            modelBuilder.Entity("GeographyService.Models.Entities.Continent", b =>
+            modelBuilder.Entity("GeographyService.Models.Continent", b =>
                 {
                     b.Navigation("CountryMappings");
                 });
 
-            modelBuilder.Entity("GeographyService.Models.Entities.Country", b =>
+            modelBuilder.Entity("GeographyService.Models.Country", b =>
                 {
                     b.Navigation("CityMappings");
 
@@ -221,7 +211,7 @@ namespace GeographyService.Migrations
                     b.Navigation("RiverMappings");
                 });
 
-            modelBuilder.Entity("GeographyService.Models.Entities.River", b =>
+            modelBuilder.Entity("GeographyService.Models.River", b =>
                 {
                     b.Navigation("RiverMappings");
                 });
